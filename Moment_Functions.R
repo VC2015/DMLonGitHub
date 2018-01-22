@@ -8,7 +8,7 @@
 source("ML_Functions.R") 
 
 DoubleML <- function(data, y, d,z, xx, xL, methods, DML, nfold, est, arguments, ensemble, silent=FALSE, trim){
-  
+
   K         <- nfold
   TE        <- matrix(0,1,(length(methods)+1))
   STE       <- matrix(0,1,(length(methods)+1))
@@ -204,7 +204,7 @@ DoubleML <- function(data, y, d,z, xx, xL, methods, DML, nfold, est, arguments, 
         
         lm.fit.ry              <- tsls(y=cond.comp[[k,j]]$ry,d=cond.comp[[k,j]]$rz, x=NULL, z=cond.comp[[k,j]]$rz2, intercept = FALSE)
         ate                    <- lm.fit.ry$coef[1];
-        HCV.coefs              <- sqrt(lm.fit.ry$vcov[1])
+        HCV.coefs              <- lm.fit.ry$vcov[1]
         
         
         STE[1,k]               <- (1/(K^2))*((HCV.coefs)) +  STE[1,k] 
@@ -215,166 +215,214 @@ DoubleML <- function(data, y, d,z, xx, xL, methods, DML, nfold, est, arguments, 
         dpool[[k]]             <- c(dpool[[k]], cond.comp[[k,j]]$rz)
         
         
-        MSE1[(length(methods)+1),j] <- error(mean(datause[,y], na.rm = TRUE), dataout[!is.na(dataout[,y]),y])$err
-        MSE2[(length(methods)+1),j] <- error(mean(datause[,d], na.rm = TRUE), dataout[!is.na(dataout[,d]),d])$err
-        MSE3[(length(methods)+1),j] <- error(mean(datause[,z], na.rm = TRUE), dataout[!is.na(dataout[,z]),z])$err
+        MSE1[(length(methods)+1),j] <- NA
+        MSE2[(length(methods)+1),j] <- NA
+        MSE3[(length(methods)+1),j] <- NA
         
       }
     }  
   }
   
-  if(length(methods)>1){
+ 
+  
+  if(est=="LATE"){
     
-    if(est=="LATE"){
-      
+    if(length(methods)>1){
+    
       min1 <- which.min(rowMeans(MSE1[1:length(methods),]))
       min2 <- which.min(rowMeans(MSE2[1:length(methods),]))
       min3 <- which.min(rowMeans(MSE3[1:length(methods),]))
       min4 <- which.min(rowMeans(MSE4[1:length(methods),]))
       min5 <- which.min(rowMeans(MSE5[1:length(methods),]))
+    
+    }
+    
+    if(length(methods)==1){
       
-      if(silent==FALSE){
-        cat('  best methods for E[Y|X, D=0]:',methods[min1],'\n')
-        cat('  best methods for E[Y|X, D=1]:',methods[min2],'\n')
-        cat('  best methods for E[D|X, Z=0]:',methods[min3],'\n')
-        cat('  best methods for E[D|X, Z=1]:',methods[min4],'\n')
-        cat('  best methods for E[Z|X]:',methods[min5],'\n')
-      }
+      min1 <- which.min(mean(MSE1[1:length(methods),]))
+      min2 <- which.min(mean(MSE2[1:length(methods),]))
+      min3 <- which.min(mean(MSE3[1:length(methods),]))
+      min4 <- which.min(mean(MSE4[1:length(methods),]))
+      min5 <- which.min(mean(MSE5[1:length(methods),]))
+      
+    }
+    
+    if(silent==FALSE){
+      cat('  best methods for E[Y|X, D=0]:',methods[min1],'\n')
+      cat('  best methods for E[Y|X, D=1]:',methods[min2],'\n')
+      cat('  best methods for E[D|X, Z=0]:',methods[min3],'\n')
+      cat('  best methods for E[D|X, Z=1]:',methods[min4],'\n')
+      cat('  best methods for E[Z|X]:',methods[min5],'\n')
+    }
+  }
+  
+  
+  if(est=="interactive"){
+    
+    if(length(methods)>1){
+    
+      min1 <- which.min(rowMeans(MSE1[1:length(methods),]))
+      min2 <- which.min(rowMeans(MSE2[1:length(methods),]))
+      min3 <- which.min(rowMeans(MSE3[1:length(methods),]))
+    
+    }
+    
+    if(length(methods)>1){
+      
+      min1 <- which.min(mean(MSE1[1:length(methods),]))
+      min2 <- which.min(mean(MSE2[1:length(methods),]))
+      min3 <- which.min(mean(MSE3[1:length(methods),]))
+      
+    }
+    
+    if(silent==FALSE){
+      cat('  best methods for E[Y|X, D=0]:',methods[min1],'\n')
+      cat('  best methods for E[Y|X, D=1]:',methods[min2],'\n')
+      cat('  best methods for E[D|X]:',methods[min3],'\n')
+    }
+  }
+  
+  if(est=="plinear"){
+    
+    if(length(methods)>1){
+    
+      min1 <- which.min(rowMeans(MSE1[1:length(methods),]))
+      min2 <- which.min(rowMeans(MSE2[1:length(methods),]))
+    
+    }
+    
+    if(length(methods)==1){
+      
+      min1 <- which.min(mean(MSE1[1:length(methods),]))
+      min2 <- which.min(mean(MSE2[1:length(methods),]))
+      
+    }
+    
+    if(silent==FALSE){   
+      cat('  best methods for E[Y|X]:',methods[min1],'\n')
+      cat('  best methods for E[D|X]:',methods[min2],'\n')
+    }    
+  }
+  
+  if(est=="IV"){
+    
+    if(length(methods)>1){
+      
+      min1 <- which.min(rowMeans(MSE1[1:length(methods),]))
+      min2 <- which.min(rowMeans(MSE2[1:length(methods),]))
+      min3 <- which.min(rowMeans(MSE3[1:length(methods),]))
+    
+    }
+    
+    if(length(methods)==1){
+      
+      min1 <- which.min(mean(MSE1[1:length(methods),]))
+      min2 <- which.min(mean(MSE2[1:length(methods),]))
+      min3 <- which.min(mean(MSE3[1:length(methods),]))
+      
+    }
+    
+    if(silent==FALSE){   
+      cat('  best methods for E[Y|X]:',methods[min1],'\n')
+      cat('  best methods for E[D|X]:',methods[min2],'\n')
+      cat('  best methods for E[Z|X]:',methods[min3],'\n')
+    }    
+  }
+  
+  for(j in 1:K){  
+    
+    ii = cvgroup == j
+    nii = cvgroup != j
+    
+    datause = as.data.frame(data[nii,])
+    dataout = as.data.frame(data[ii,])  
+    
+    
+    if(est=="LATE"){
+      
+      drop                   <- which(cond.comp[[min5,j]]$mz2_x>trim[1] & cond.comp[[min5,j]]$mz2_x<trim[2])      
+      mz_x                   <- cond.comp[[min1,j]]$mz2_x[drop]
+      my_z1x                 <- cond.comp[[min2,j]]$my_z1x[drop]
+      my_z0x                 <- cond.comp[[min3,j]]$my_z0x[drop]
+      md_z1x                 <- cond.comp[[min4,j]]$md_z1x[drop]
+      if(flag==1){ md_z0x    <- matrix(0,1,length(my_z0x))}
+      else{  md_z0x          <- cond.comp[[min5,j]]$md_z0x[drop] }
+      
+      yout                   <- dataout[drop,y]
+      dout                   <- dataout[drop,d]
+      zout                   <- dataout[drop,z]
+      
+      TE[1,(k+1)]            <- LATE(yout, dout, zout, my_z1x, my_z0x, mz_x, md_z1x, md_z0x)/K + TE[1,(k+1)];
+      STE[1,(k+1)]           <- (1/(K^2))*((SE.LATE(yout, dout, zout, my_z1x, my_z0x, mz_x, md_z1x, md_z0x))^2) + STE[1,(k+1)];
+      
+      ypool[[k+1]]             <- c(ypool[[k+1]], yout)
+      dpool[[k+1]]             <- c(dpool[[k+1]], dout)
+      zopool[[k+1]]            <- c(zopool[[k+1]], zout)
+      zpool[[k+1]]             <- c(zpool[[k+1]], mz_x)
+      z1pool[[k+1]]            <- c(z1pool[[k+1]], my_z1x)
+      z0pool[[k+1]]            <- c(z0pool[[k+1]], my_z0x)
+      dz1pool[[k+1]]           <- c(dz1pool[[k+1]], md_z1x)
+      dz0pool[[k+1]]           <- c(dz0pool[[k+1]], md_z0x)
+      
     }
     
     
     if(est=="interactive"){
       
-      min1 <- which.min(rowMeans(MSE1[1:length(methods),]))
-      min2 <- which.min(rowMeans(MSE2[1:length(methods),]))
-      min3 <- which.min(rowMeans(MSE3[1:length(methods),]))
+      drop                   <- which(cond.comp[[min3,j]]$mz_x>trim[1] & cond.comp[[min3,j]]$mz_x<trim[2])      
+      mz_x                   <- cond.comp[[min1,j]]$mz_x[drop]
+      my_z1x                 <- cond.comp[[min2,j]]$my_z1x[drop]
+      my_z0x                 <- cond.comp[[min3,j]]$my_z0x[drop]
+      yout                   <- dataout[drop,y]
+      dout                   <- dataout[drop,d]
       
-      if(silent==FALSE){
-        cat('  best methods for E[Y|X, D=0]:',methods[min1],'\n')
-        cat('  best methods for E[Y|X, D=1]:',methods[min2],'\n')
-        cat('  best methods for E[D|X]:',methods[min3],'\n')
-      }
+      TE[1,(k+1)]            <- ATE(yout, dout, my_z1x, my_z0x, mz_x)/K + TE[1,(k+1)];
+      STE[1,(k+1)]           <- (1/(K^2))*((SE.ATE(yout, dout, my_z1x, my_z0x, mz_x))^2) + STE[1,(k+1)];
+      
+      ypool[[k+1]]             <- c(ypool[[k+1]], yout)
+      dpool[[k+1]]             <- c(dpool[[k+1]], dout)
+      zpool[[k+1]]             <- c(zpool[[k+1]], mz_x)
+      z1pool[[k+1]]            <- c(z1pool[[k+1]], my_z1x)
+      z0pool[[k+1]]            <- c(z0pool[[k+1]], my_z0x)
+      
     }
     
     if(est=="plinear"){
       
-      min1 <- which.min(rowMeans(MSE1[1:length(methods),]))
-      min2 <- which.min(rowMeans(MSE2[1:length(methods),]))
+      lm.fit.ry              <- lm(as.matrix(cond.comp[[min1,j]]$ry) ~ as.matrix(cond.comp[[min2,j]]$rz)-1);
+      ate                    <- lm.fit.ry$coef;
+      HCV.coefs              <- vcovHC(lm.fit.ry, type = 'HC');
+      STE[1,(k+1)]           <- (1/(K^2))*(diag(HCV.coefs)) +  STE[1,(k+1)] 
+      TE[1,(k+1)]            <- ate/K + TE[1,(k+1)] ;
       
-      if(silent==FALSE){   
-        cat('  best methods for E[Y|X]:',methods[min1],'\n')
-        cat('  best methods for E[D|X]:',methods[min2],'\n')
-      }    
+      ypool[[k+1]]             <- c(ypool[[k+1]], cond.comp[[min1,j]]$ry)
+      zpool[[k+1]]             <- c(zpool[[k+1]], cond.comp[[min2,j]]$rz)
+      
+      
     }
     
     if(est=="IV"){
-      
-      min1 <- which.min(rowMeans(MSE1[1:length(methods),]))
-      min2 <- which.min(rowMeans(MSE2[1:length(methods),]))
-      min3 <- which.min(rowMeans(MSE3[1:length(methods),]))
-      
-      if(silent==FALSE){   
-        cat('  best methods for E[Y|X]:',methods[min1],'\n')
-        cat('  best methods for E[D|X]:',methods[min2],'\n')
-        cat('  best methods for E[Z|X]:',methods[min3],'\n')
-      }    
-    }
-    
-    
-    for(j in 1:K){  
-      
-      ii = cvgroup == j
-      nii = cvgroup != j
-      
-      datause = as.data.frame(data[nii,])
-      dataout = as.data.frame(data[ii,])  
+
+      lm.fit.ry              <- tsls(y=cond.comp[[min1,j]]$ry, d=cond.comp[[min2,j]]$rz, x=NULL, z=cond.comp[[min3,j]]$rz2, intercept = FALSE)
+      ate                    <- lm.fit.ry$coef[1];
+      HCV.coefs              <- lm.fit.ry$vcov[1]
       
       
-      if(est=="LATE"){
-        
-        drop                   <- which(cond.comp[[min5,j]]$mz2_x>trim[1] & cond.comp[[min5,j]]$mz2_x<trim[2])      
-        mz_x                   <- cond.comp[[min1,j]]$mz2_x[drop]
-        my_z1x                 <- cond.comp[[min2,j]]$my_z1x[drop]
-        my_z0x                 <- cond.comp[[min3,j]]$my_z0x[drop]
-        md_z1x                 <- cond.comp[[min4,j]]$md_z1x[drop]
-        if(flag==1){ md_z0x    <- matrix(0,1,length(my_z0x))}
-        else{  md_z0x          <- cond.comp[[min5,j]]$md_z0x[drop] }
-        
-        yout                   <- dataout[drop,y]
-        dout                   <- dataout[drop,d]
-        zout                   <- dataout[drop,z]
-        
-        TE[1,(k+1)]            <- LATE(yout, dout, zout, my_z1x, my_z0x, mz_x, md_z1x, md_z0x)/K + TE[1,(k+1)];
-        STE[1,(k+1)]           <- (1/(K^2))*((SE.LATE(yout, dout, zout, my_z1x, my_z0x, mz_x, md_z1x, md_z0x))^2) + STE[1,(k+1)];
-        
-        ypool[[k+1]]             <- c(ypool[[k+1]], yout)
-        dpool[[k+1]]             <- c(dpool[[k+1]], dout)
-        zopool[[k+1]]            <- c(zopool[[k+1]], zout)
-        zpool[[k+1]]             <- c(zpool[[k+1]], mz_x)
-        z1pool[[k+1]]            <- c(z1pool[[k+1]], my_z1x)
-        z0pool[[k+1]]            <- c(z0pool[[k+1]], my_z0x)
-        dz1pool[[k+1]]           <- c(dz1pool[[k+1]], md_z1x)
-        dz0pool[[k+1]]           <- c(dz0pool[[k+1]], md_z0x)
-        
-      }
+      STE[1,(k+1)]           <- (1/(K^2))*((HCV.coefs)) +  STE[1,(k+1)] 
+      TE[1,(k+1)]            <- ate/K + TE[1,(k+1)] ;
       
+      ypool[[k+1]]             <- c(ypool[[k+1]], cond.comp[[min1,j]]$ry)
+      zpool[[k+1]]             <- c(zpool[[k+1]], cond.comp[[min3,j]]$rz2)
+      dpool[[k+1]]             <- c(dpool[[k+1]], cond.comp[[min2,j]]$rz)
       
-      if(est=="interactive"){
-        
-        drop                   <- which(cond.comp[[min3,j]]$mz_x>trim[1] & cond.comp[[min3,j]]$mz_x<trim[2])      
-        mz_x                   <- cond.comp[[min1,j]]$mz_x[drop]
-        my_z1x                 <- cond.comp[[min2,j]]$my_z1x[drop]
-        my_z0x                 <- cond.comp[[min3,j]]$my_z0x[drop]
-        yout                   <- dataout[drop,y]
-        dout                   <- dataout[drop,d]
-        
-        TE[1,(k+1)]            <- ATE(yout, dout, my_z1x, my_z0x, mz_x)/K + TE[1,(k+1)];
-        STE[1,(k+1)]           <- (1/(K^2))*((SE.ATE(yout, dout, my_z1x, my_z0x, mz_x))^2) + STE[1,(k+1)];
-        
-        ypool[[k+1]]             <- c(ypool[[k+1]], yout)
-        dpool[[k+1]]             <- c(dpool[[k+1]], dout)
-        zpool[[k+1]]             <- c(zpool[[k+1]], mz_x)
-        z1pool[[k+1]]            <- c(z1pool[[k+1]], my_z1x)
-        z0pool[[k+1]]            <- c(z0pool[[k+1]], my_z0x)
-        
-      }
-      
-      if(est=="plinear"){
-        
-        lm.fit.ry              <- lm(as.matrix(cond.comp[[min1,j]]$ry) ~ as.matrix(cond.comp[[min2,j]]$rz)-1);
-        ate                    <- lm.fit.ry$coef;
-        HCV.coefs              <- vcovHC(lm.fit.ry, type = 'HC');
-        STE[1,(k+1)]           <- (1/(K^2))*(diag(HCV.coefs)) +  STE[1,(k+1)] 
-        TE[1,(k+1)]            <- ate/K + TE[1,(k+1)] ;
-        
-        ypool[[k+1]]             <- c(ypool[[k+1]], cond.comp[[min1,j]]$ry)
-        zpool[[k+1]]             <- c(zpool[[k+1]], cond.comp[[min2,j]]$rz)
-        
-        
-      }
-      
-      if(est=="IV"){
-        
-        lm.fit.ry              <- tsls(y=cond.comp[[min1,j]]$ry, d=cond.comp[[min2,j]]$rz, x=NULL, z=cond.comp[[min3,j]]$rz2, intercept = FALSE)
-        ate                    <- lm.fit.ry$coef[1];
-        HCV.coefs              <- sqrt(lm.fit.ry$vcov[1])
-        
-        
-        STE[1,(k+1)]           <- (1/(K^2))*((HCV.coefs)) +  STE[1,(k+1)] 
-        TE[1,(k+1)]            <- ate/K + TE[1,(k+1)] ;
-        
-        ypool[[k+1]]             <- c(ypool[[k+1]], cond.comp[[k,j]]$ry)
-        zpool[[k+1]]             <- c(zpool[[k+1]], cond.comp[[k,j]]$rz2)
-        dpool[[k+1]]             <- c(dpool[[k+1]], cond.comp[[k,j]]$rz)
-        
-      }
     }
   }
+
   
   
   TE_pool        <- matrix(0,1,(length(methods)+1))
   STE_pool       <- matrix(0,1,(length(methods)+1))
-  
+
   for(k in 1:(length(methods)+1)){ 
     
     if(est=="LATE"){
@@ -405,20 +453,20 @@ DoubleML <- function(data, y, d,z, xx, xL, methods, DML, nfold, est, arguments, 
       
       lm.fit.ry              <- tsls(y=ypool[[k]],d=dpool[[k]], x=NULL, z=zpool[[k]], intercept = FALSE)
       ate                    <- lm.fit.ry$coef[1];
-      HCV.coefs              <- sqrt(lm.fit.ry$vcov[1])
+      HCV.coefs              <- lm.fit.ry$vcov[1]
       
       STE_pool[1,k]          <- HCV.coefs
       TE_pool[1,k]           <- ate
+
     }
   }
-  
+
   if(length(methods)==1){
     
     TE_pool[1,(length(methods)+1)]  <- TE_pool[1,(length(methods))]
     STE_pool[1,(length(methods)+1)] <- STE_pool[1,(length(methods))]
     
   }
-  
   colnames(result)   <- c(methods, "best") 
   colnames(result2)  <- c(methods, "best") 
   rownames(MSE1)     <- c(methods, "best") 

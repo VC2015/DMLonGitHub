@@ -32,7 +32,7 @@ source("ML_Functions.R")
 source("Moment_Functions.R")  
 options(warn=-1)
 set.seed(1211);
-cl   <- makeCluster(12, outfile="")
+cl   <- makeCluster(2, outfile="")
 
 data(AJR); 
 data <- AJR
@@ -65,6 +65,8 @@ arguments    <- list(Boosting=Boosting, Forest=Forest, RLasso=RLasso, Nnet=Nnet,
 
 ensemble     <- list(methods=c("RLasso", "Boosting", "Forest"))                       # methods for the ensemble estimation
 methods      <- c("RLasso","Trees", "Boosting", "Forest", "Nnet","Ensemble")          # ML methods that are used in estimation
+#methods      <- c("RLasso","RLasso")          # ML methods that are used in estimation
+
 split        <- 100                                                                   # number of splits
 
 ################################ Estimation ##################################################
